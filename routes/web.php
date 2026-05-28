@@ -117,14 +117,13 @@ Route::middleware('auth')->group(function () {
         // Peserta (CRUD lengkap)
         Route::resource('peserta', PesertaController::class);
 
-
-
         // Notulensi
         Route::resource('notulensi', NotulensiController::class);
         Route::get('notulensi/{id}/export', [NotulensiController::class, 'exportPdf'])->name('notulensi.exportPdf');
 
         // Rekapitulasi — export route MUST be before resource to avoid {id} catching 'raport'
         Route::get('/rekapitulasi/raport/{id}/export', [RekapitulasiController::class, 'exportRaport'])->name('raport.export');
+        Route::get('/export-ranking', [RekapitulasiController::class, 'exportRanking'])->name('ranking.export');
         Route::resource('rekapitulasi', RekapitulasiController::class);
 
         // Syahadah

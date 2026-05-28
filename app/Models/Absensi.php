@@ -14,7 +14,9 @@ class Absensi extends Model
     protected $fillable = [
         'peserta_id',
         'materi_id',
+        'kategori',
         'hadir',
+        'peserta_nama',
     ];
 
     // Relasi ke Peserta

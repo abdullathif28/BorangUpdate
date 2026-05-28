@@ -361,5 +361,14 @@ document.querySelectorAll('.edit-btn').forEach(btn => {
         }
     });
 });
+
+// Pastikan semua checkbox di-enable sebelum form dikirim, 
+// agar checkbox dari baris yang terkunci nilainya tetap terkirim ke server 
+// dan tidak dianggap 'kosong' (yang menyebabkan nilainya terhapus/menjadi 0).
+document.getElementById('hafalanForm').addEventListener('submit', function() {
+    document.querySelectorAll('.surat-checkbox').forEach(cb => {
+        cb.disabled = false;
+    });
+});
 </script>
 @endpush

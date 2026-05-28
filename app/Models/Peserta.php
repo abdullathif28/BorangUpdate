@@ -99,9 +99,16 @@ class Peserta extends Model
      */
     public function hafalanScore(): float
     {
-        $nilai = $this->hafalanNilai;
-        if ($nilai->isEmpty()) return 0;
-        return round($nilai->sum('nilai'), 2);
+        $hafalan = $this->hafalanNilai()->where('hafal', true)->count();
+        if ($hafalan == 0) return 0;
+
+        $totalAyat = \App\Models\AyatPelatihan::where('pelatihan_id', $this->pelatihan_id)->count();
+        if ($totalAyat == 0) return 0;
+
+        $score = ($hafalan / $totalAyat) * 100;
+        
+        // Memastikan jika hafal semua ayat nilainya persis 100
+        return round($score, 2);
     }
 
     public function totalRaportScore()
@@ -149,9 +156,9 @@ class Peserta extends Model
     {
         $nilai = $this->averageRaportScore();
         if ($nilai >= 90) return 'A';
-        if ($nilai >= 80) return 'B';
-        if ($nilai >= 70) return 'C';
-        if ($nilai >= 60) return 'D';
+        if ($nilai >= 75) return 'B';
+        if ($nilai >= 65) return 'C';
+        if ($nilai >= 55) return 'D';
         return 'E';
     }
 

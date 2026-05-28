@@ -26,10 +26,9 @@
     .table-responsive {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
-        padding-bottom: 0.5rem; /* Ruang untuk scrollbar */
+        padding-bottom: 0.5rem;
     }
     
-    /* Custom Scrollbar agar selalu terlihat */
     .table-responsive::-webkit-scrollbar {
         height: 10px;
     }
@@ -50,7 +49,7 @@
         width: 100%;
         border-collapse: separate;
         border-spacing: 0;
-        white-space: nowrap; /* Mencegah teks bertumpuk ke bawah */
+        white-space: nowrap;
     }
 
     .table-custom th {
@@ -87,12 +86,12 @@
         background-color: #f8fafc;
     }
 
-    /* Sticky First Columns (Fixed Overlap) */
+    /* Sticky First Columns */
     .table-custom th:nth-child(1), 
     .table-custom td:nth-child(1) {
         position: sticky;
         left: 0;
-        background-color: #ffffff; /* Pastikan background putih agar tidak transparan saat scroll */
+        background-color: #ffffff;
         z-index: 2;
         width: 50px;
         min-width: 50px;
@@ -101,14 +100,13 @@
     .table-custom th:nth-child(2), 
     .table-custom td:nth-child(2) {
         position: sticky;
-        left: 50px; /* Mengikuti lebar kolom 1 */
+        left: 50px;
         background-color: #ffffff;
         z-index: 2;
         min-width: 200px;
-        box-shadow: 2px 0 5px -2px rgba(0,0,0,0.08); /* Bayangan pemisah area sticky */
+        box-shadow: 2px 0 5px -2px rgba(0,0,0,0.08);
     }
 
-    /* Tumpuk header sticky di atas baris data sticky */
     .table-custom th:nth-child(1), 
     .table-custom th:nth-child(2) {
         background-color: var(--dash-bg);
@@ -168,7 +166,6 @@
     <form action="{{ route('rekapitulasi.store') }}" method="POST">
         @csrf
         <div class="dashboard-card mb-5">
-            <!-- Header yang rapi dengan tombol di kanan -->
             <div class="section-header flex-column flex-sm-row gap-3">
                 <div class="d-flex align-items-center gap-3">
                     <div class="bg-primary bg-opacity-10 text-primary p-2 rounded-3 d-flex align-items-center justify-content-center">
@@ -179,14 +176,19 @@
                         <small class="text-muted">Kelola nilai Pretest, Posttest, dan pantau rekap total.</small>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary d-flex align-items-center gap-2 fw-medium px-4 w-100 w-sm-auto justify-content-center">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                    Simpan Rekap
-                </button>
+                <div class="d-flex align-items-center gap-2 w-100 w-sm-auto justify-content-center">
+                    <a href="{{ route('ranking.export') }}" target="_blank" class="btn btn-danger d-flex align-items-center gap-2 fw-medium px-4">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        Export Ranking PDF
+                    </a>
+                    <button type="submit" class="btn btn-primary d-flex align-items-center gap-2 fw-medium px-4">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                        Simpan Rekap
+                    </button>
+                </div>
             </div>
             
             <div class="card-body p-0">
-                <!-- Hint scroll untuk mobile/layar kecil -->
                 <div class="d-block d-md-none text-center py-2 bg-light border-bottom text-muted" style="font-size: 0.75rem;">
                     <i class="bi bi-arrows-collapse me-1"></i> Geser tabel ke kiri/kanan untuk melihat semua kolom
                 </div>
@@ -200,8 +202,8 @@
                                 <th class="text-start">Delegasi</th>
                                 <th class="bg-primary bg-opacity-10 text-primary">Pretest</th>
                                 <th class="bg-primary bg-opacity-10 text-primary">Posttest</th>
+                                <th class="bg-success bg-opacity-10 text-success">Hafalan</th>
 
-                                <!-- Kategori Penilaian -->
                                 @foreach ($materiList as $materi)
                                     <th>{{ $materi->nama_materi }}</th>
                                 @endforeach
@@ -218,7 +220,6 @@
                                     <th>{{ $games->nama_games }}</th>
                                 @endforeach
 
-                                <!-- Rekap Akhir -->
                                 <th class="bg-light">Jumlah</th>
                                 <th class="bg-light">Rata-rata</th>
                                 <th class="bg-light">Predikat</th>
@@ -230,12 +231,10 @@
                         <tbody>
                             @foreach($peserta as $p)
                                 @php
-                                    // Use model helper (consistent with raport export)
-                                    $rata = $p->averageRaportScore();
-                                    $predikat = $p->predikatRaport();
+                                    $rata = $p->rata_akhir ?? 0;
+                                    $predikat = $p->predikat_akhir ?? 'E';
                                     $keterangan = in_array($predikat, ['A', 'B', 'C']) ? 'Lulus' : 'Tidak Lulus';
                                     
-                                    // Warna Badge dinamis
                                     $badgePredikat = match($predikat) {
                                         'A' => 'bg-success',
                                         'B' => 'bg-primary',
@@ -249,15 +248,16 @@
                                     <td class="text-start fw-bold text-dark">{{ $p->nama }}</td>
                                     <td class="text-start text-muted">{{ $p->asal_pimpinan }}</td>
                                     
-                                    <!-- Input Pretest & Posttest -->
                                     <td class="bg-primary bg-opacity-10">
                                         <input type="number" name="pretest[{{ $p->id }}]" class="input-mini" value="{{ $p->pretest ?? 0 }}">
                                     </td>
                                     <td class="bg-primary bg-opacity-10">
                                         <input type="number" name="posttest[{{ $p->id }}]" class="input-mini" value="{{ $p->posttest ?? 0 }}">
                                     </td>
+                                    <td class="bg-success bg-opacity-10 text-success fw-bold">
+                                        {{ $p->hafalan_score ?? 0 }}
+                                    </td>
 
-                                    {{-- Materi --}}
                                     @foreach ($materiList as $materi)
                                         @php
                                             $obs = $p->observasiProses->where('materi_id', $materi->id)->first();
@@ -265,17 +265,13 @@
                                         <td>{{ $obs ? $obs->afektif + $obs->psikomotorik + $obs->kognitif : 0 }}</td>
                                     @endforeach
 
-                                    {{-- Pendalaman --}}
                                     @foreach ($materiList as $materi)
                                          @php
                                             $obs = $p->observasiPendalaman->firstWhere('materi_id', $materi->id);
                                         @endphp
-                                        <td>
-                                            {{ $obs ? $obs->afektif + $obs->psikomotorik + $obs->kognitif : 0 }}
-                                        </td>
+                                        <td>{{ $obs ? $obs->afektif + $obs->psikomotorik + $obs->kognitif : 0 }}</td>
                                     @endforeach
 
-                                    {{-- Imamah --}}
                                     @foreach ($imamahList as $materi)
                                         @php
                                             $obs = $p->observasiImamah->where('imamah_id', $materi->id)->first();
@@ -283,7 +279,6 @@
                                         <td>{{ $obs ? $obs->afektif + $obs->psikomotorik + $obs->kognitif : 0 }}</td>
                                     @endforeach
 
-                                    {{-- Games --}}
                                     @foreach ($gamesList as $materi)
                                         @php
                                             $obs = $p->observasiGames->where('games_id', $materi->id)->first();
@@ -291,8 +286,7 @@
                                         <td>{{ $obs ? $obs->afektif + $obs->psikomotorik + $obs->kognitif : 0 }}</td>
                                     @endforeach
 
-                                    {{-- Rekap Akhir --}}
-                                    <td class="bg-light fw-bold text-dark">{{ $p->totalRaportScore() }}</td>
+                                    <td class="bg-light fw-bold text-dark">{{ $p->nilai_akhir ?? 0 }}</td>
                                     <td class="bg-light fw-bold text-primary">{{ $rata }}</td>
                                     <td class="bg-light">
                                         <span class="badge {{ $badgePredikat }} rounded-pill px-3">{{ $predikat }}</span>
@@ -301,7 +295,6 @@
                                         <span class="badge {{ $badgeKeterangan }} px-2 py-1">{{ $keterangan }}</span>
                                     </td> 
                                     
-                                    {{-- Aksi --}}
                                     <td class="text-center">
                                         <a href="{{ route('raport.export', $p->id) }}" target="_blank" class="btn btn-sm btn-danger d-inline-flex align-items-center gap-1 shadow-sm">
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>

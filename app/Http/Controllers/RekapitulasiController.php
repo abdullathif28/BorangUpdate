@@ -49,14 +49,43 @@ class RekapitulasiController extends Controller
         $pendalamanList = ObservasiPendalaman::whereIn('peserta_id', $peserta->pluck('id'))->get()
             ->keyBy(fn($item) => $item->materi_id . '_' . $item->peserta_id);
 
-        $peserta->map(function ($p) {
+        $peserta->map(function ($p) use ($materiList, $imamahList, $gamesList) {
             $p->observasi_proses_sum     = $p->observasiProses->sum(fn($o) => $o->afektif + $o->psikomotorik + $o->kognitif);
             $p->observasi_pendalaman_sum = $p->observasiPendalaman->sum(fn($o) => $o->afektif + $o->psikomotorik + $o->kognitif);
             $p->observasi_imamah_sum     = $p->observasiImamah->sum(fn($o) => $o->afektif + $o->psikomotorik + $o->kognitif);
             $p->observasi_games_sum      = $p->observasiGames->sum(fn($o) => $o->afektif + $o->psikomotorik + $o->kognitif);
             $p->hafalan_score            = $p->hafalanScore();
+
+            $totalObservasi =
+                $p->observasiProses->sum(fn($o) => $o->afektif + $o->psikomotorik + $o->kognitif) +
+                $p->observasiPendalaman->sum(fn($o) => $o->afektif + $o->psikomotorik + $o->kognitif) +
+                $p->observasiImamah->sum(fn($o) => $o->afektif + $o->psikomotorik + $o->kognitif) +
+                $p->observasiGames->sum(fn($o) => $o->afektif + $o->psikomotorik + $o->kognitif);
+
+            $p->nilai_akhir =
+                ($p->pretest ?? 0) +
+                ($p->posttest ?? 0) +
+                $p->hafalan_score +
+                $totalObservasi;
+
+            $totalMateri =
+                count($materiList) +
+                count($materiList) + // Karena pendalaman juga menggunakan materiList di view
+                count($imamahList) +
+                count($gamesList);
+            
+            $p->rata_akhir = round($p->nilai_akhir / ($totalMateri + 3), 2);
+
+            $p->predikat_akhir = 'E';
+            if ($p->rata_akhir >= 90) $p->predikat_akhir = 'A';
+            elseif ($p->rata_akhir >= 75) $p->predikat_akhir = 'B';
+            elseif ($p->rata_akhir >= 65) $p->predikat_akhir = 'C';
+            elseif ($p->rata_akhir >= 55) $p->predikat_akhir = 'D';
+
             return $p;
         });
+
+        $peserta = $peserta->sortByDesc(fn($p) => $p->rata_akhir)->values();
 
         return view('rekapitulasi.rekapitulasi', compact(
             'peserta', 'materiList', 'pendalamanList', 'imamahList', 'gamesList', 'pelatihan', 'allPelatihan'
@@ -65,7 +94,6 @@ class RekapitulasiController extends Controller
 
     public function store(Request $request)
     {
-        // Guard: pretest may not be in request if no peserta
         if (!$request->has('pretest') || !is_array($request->pretest)) {
             return redirect()->back()->with('error', 'Tidak ada data yang disimpan.');
         }
@@ -79,6 +107,54 @@ class RekapitulasiController extends Controller
             }
         }
         return redirect()->back()->with('success', 'Rekapitulasi berhasil disimpan!');
+    }
+
+    public function exportRanking()
+    {
+        $pelatihan = $this->getActivePelatihan();
+
+        if (!$pelatihan) {
+            return redirect()->back()->with('error', 'Tidak ada pelatihan aktif.');
+        }
+
+        $peserta = Peserta::with([
+            'observasiProses',
+            'observasiPendalaman',
+            'observasiImamah',
+            'observasiGames',
+            'hafalanNilai',
+        ])->where('pelatihan_id', $pelatihan->id)->get();
+
+        $materiList = \App\Models\MateriPelatihan::where('pelatihan_id', $pelatihan->id)->get();
+        $imamahList = \App\Models\Imamah_kajian::where('pelatihan_id', $pelatihan->id)->get();
+        $gamesList  = \App\Models\games::where('pelatihan_id', $pelatihan->id)->get();
+
+        $peserta->map(function ($p) use ($materiList, $imamahList, $gamesList) {
+            $p->hafalan_score = $p->hafalanScore();
+            $totalObservasi =
+                $p->observasiProses->sum(fn($o) => $o->afektif + $o->psikomotorik + $o->kognitif) +
+                $p->observasiPendalaman->sum(fn($o) => $o->afektif + $o->psikomotorik + $o->kognitif) +
+                $p->observasiImamah->sum(fn($o) => $o->afektif + $o->psikomotorik + $o->kognitif) +
+                $p->observasiGames->sum(fn($o) => $o->afektif + $o->psikomotorik + $o->kognitif);
+
+            $p->nilai_akhir = ($p->pretest ?? 0) + ($p->posttest ?? 0) + $p->hafalan_score + $totalObservasi;
+
+            $totalMateri = (count($materiList) * 2) + count($imamahList) + count($gamesList);
+            $p->rata_akhir = round($p->nilai_akhir / ($totalMateri + 3), 2);
+
+            $p->predikat_akhir = 'E';
+            if ($p->rata_akhir >= 90) $p->predikat_akhir = 'A';
+            elseif ($p->rata_akhir >= 75) $p->predikat_akhir = 'B';
+            elseif ($p->rata_akhir >= 65) $p->predikat_akhir = 'C';
+            elseif ($p->rata_akhir >= 55) $p->predikat_akhir = 'D';
+
+            return $p;
+        });
+
+        $peserta = $peserta->sortByDesc(fn($p) => $p->rata_akhir)->values();
+
+        $pdf = Pdf::loadView('rekapitulasi.rangking_pdf', compact('peserta', 'pelatihan'));
+        return $pdf->download('ranking_peserta_' . time() . '.pdf');
     }
 
     public function exportRaport($id)
@@ -97,7 +173,7 @@ class RekapitulasiController extends Controller
             $pelatihan = $peserta->pelatihan;
         }
 
-        $materiList  = $pelatihan ? MateriPelatihan::where('pelatihan_id', $pelatihan->id)->get() : collect();
+        $materiList   = $pelatihan ? MateriPelatihan::where('pelatihan_id', $pelatihan->id)->get() : collect();
         $nilaiHafalan = $peserta->hafalanScore();
 
         $total = ($peserta->pretest ?? 0)

@@ -41,7 +41,9 @@ class ObservasigamesController extends Controller
             ->get()
             ->keyBy(fn($item) => $item->games_id . '_' . $item->peserta_id);
 
-        $absensiRaw = Absensi::whereIn('peserta_id', $pesertaIds)->get();
+        $absensiRaw = Absensi::whereIn('peserta_id', $pesertaIds)
+            ->where('kategori', 'games')
+            ->get();
         $absensi = [];
         foreach ($absensiRaw as $a) {
             $absensi[$a->materi_id . '_' . $a->peserta_id] = $a;
@@ -54,7 +56,7 @@ class ObservasigamesController extends Controller
     {
         $request->validate([
             'games_id' => 'required|exists:games,id',
-            'nilai'    => 'required|array',
+            'nilai'    => 'nullable|array',
         ]);
 
         // Security: verify submitted games_id belongs to active pelatihan
@@ -67,35 +69,24 @@ class ObservasigamesController extends Controller
             }
         }
 
-        foreach ($request->nilai as $games_id => $peserta_nilai) {
-            foreach ($peserta_nilai as $peserta_id => $aspek_nilai) {
-                $existing        = Observasi_games::where('games_id', $games_id)->where('peserta_id', $peserta_id)->first();
-                $oldAfektif      = $existing?->afektif ?? 0;
-                $oldKognitif     = $existing?->kognitif ?? 0;
-                $oldPsikomotorik = $existing?->psikomotorik ?? 0;
-
-                $newAfektif      = isset($aspek_nilai['afektif']) ? count($aspek_nilai['afektif']) * 10 : null;
-                $newKognitif     = isset($aspek_nilai['kognitif']) ? count($aspek_nilai['kognitif']) * 10 : null;
-                $newPsikomotorik = isset($aspek_nilai['psikomotorik']) ? count($aspek_nilai['psikomotorik']) * 10 : null;
-
-                $afektif      = $newAfektif ?? $oldAfektif;
-                $kognitif     = $newKognitif ?? $oldKognitif;
-                $psikomotorik = $newPsikomotorik ?? $oldPsikomotorik;
-
-                Observasi_games::updateOrCreate(
-                    ['games_id' => $games_id, 'peserta_id' => $peserta_id],
-                    ['afektif' => $afektif, 'kognitif' => $kognitif, 'psikomotorik' => $psikomotorik, 'jumlah' => $afektif + $kognitif + $psikomotorik]
-                );
-            }
-        }
-
         if ($request->has('absensi')) {
             foreach ($request->input('absensi') as $materiId => $pesertaAbsensi) {
                 foreach ($pesertaAbsensi as $pesertaId => $isHadir) {
                     $peserta = Peserta::find($pesertaId);
                     Absensi::updateOrCreate(
-                        ['materi_id' => $materiId, 'peserta_id' => $pesertaId],
+                        ['materi_id' => $materiId, 'peserta_id' => $pesertaId, 'kategori' => 'games'],
                         ['hadir' => $isHadir, 'peserta_nama' => $peserta?->nama ?? 'TIDAK DIKETAHUI']
+                    );
+
+                    $aspek_nilai = $request->input("nilai.{$materiId}.{$pesertaId}", []);
+                    
+                    $afektif      = isset($aspek_nilai['afektif']) ? count($aspek_nilai['afektif']) * 10 : 0;
+                    $kognitif     = isset($aspek_nilai['kognitif']) ? count($aspek_nilai['kognitif']) * 10 : 0;
+                    $psikomotorik = isset($aspek_nilai['psikomotorik']) ? count($aspek_nilai['psikomotorik']) * 10 : 0;
+
+                    Observasi_games::updateOrCreate(
+                        ['games_id' => $materiId, 'peserta_id' => $pesertaId],
+                        ['afektif' => $afektif, 'kognitif' => $kognitif, 'psikomotorik' => $psikomotorik, 'jumlah' => $afektif + $kognitif + $psikomotorik]
                     );
                 }
             }

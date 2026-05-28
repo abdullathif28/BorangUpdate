@@ -201,9 +201,9 @@
                                         <th rowspan="2" class="text-start align-middle border-bottom-0" style="min-width: 150px;">Nama Peserta</th>
                                         <th rowspan="2" class="align-middle border-bottom-0">Absensi</th>
                                         <!-- Clean Subtle Colored Headers -->
-                                        <th colspan="4" class="th-afektif border-bottom">Afektif</th>
-                                        <th colspan="2" class="th-kognitif border-bottom">Kognitif</th>
-                                        <th colspan="4" class="th-psikomotorik border-bottom">Psikomotorik</th>
+                                        <th colspan="3" class="th-afektif border-bottom">Afektif</th>
+                                        <th colspan="4" class="th-kognitif border-bottom">Kognitif</th>
+                                        <th colspan="3" class="th-psikomotorik border-bottom">Psikomotorik</th>
                                         <th rowspan="2" class="align-middle border-bottom-0 bg-light">Total</th>
                                     </tr>
                                     <tr>
@@ -211,15 +211,15 @@
                                         <th class="th-afektif border-top-0">1</th>
                                         <th class="th-afektif border-top-0">2</th>
                                         <th class="th-afektif border-top-0">3</th>
-                                        <th class="th-afektif border-top-0">4</th>
                                         <!-- Kognitif -->
                                         <th class="th-kognitif border-top-0">1</th>
                                         <th class="th-kognitif border-top-0">2</th>
+                                        <th class="th-kognitif border-top-0">3</th>
+                                        <th class="th-kognitif border-top-0">4</th>
                                         <!-- Psikomotorik -->
                                         <th class="th-psikomotorik border-top-0">1</th>
                                         <th class="th-psikomotorik border-top-0">2</th>
                                         <th class="th-psikomotorik border-top-0">3</th>
-                                        <th class="th-psikomotorik border-top-0">4</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -229,6 +229,7 @@
                                         <td class="text-start fw-medium text-dark">{{ $p->nama }}</td>
 
                                         <td>
+                                            <input type="hidden" name="absensi[{{ $imamahItem->id }}][{{ $p->id }}]" value="0">
                                             <input type="checkbox"
                                                 class="form-check-input custom-cb checkbox-absensi materi-{{ $imamahItem->id }} peserta-{{ $p->id }}"
                                                 name="absensi[{{ $imamahItem->id }}][{{ $p->id }}]"
@@ -241,7 +242,7 @@
                                         @php $kategori = ['afektif']; @endphp
                                         @foreach($kategori as $kat)
                                          
-                                            @for($i = 0; $i < 4; $i++)
+                                            @for($i = 0; $i < 3; $i++)
                                             <td>
                                                 <input type="checkbox"
                                                     class="form-check-input custom-cb checkbox-afektif materi-{{ $imamahItem->id }} peserta-{{ $p->id }}"
@@ -255,7 +256,7 @@
                                             @endfor
 
                                             {{-- Kognitif --}}
-                                            @for($i = 0; $i < 2; $i++)
+                                            @for($i = 0; $i < 4; $i++)
                                             <td>
                                                 <input type="checkbox"
                                                     class="form-check-input custom-cb checkbox-kognitif materi-{{ $imamahItem->id }} peserta-{{ $p->id }}"
@@ -269,7 +270,7 @@
                                             @endfor
 
                                             {{-- Psikomotorik --}}
-                                            @for($i = 0; $i < 4; $i++)
+                                            @for($i = 0; $i < 3; $i++)
                                             <td>
                                                 <input type="checkbox"
                                                     class="form-check-input custom-cb checkbox-psikomotorik materi-{{ $imamahItem->id }} peserta-{{ $p->id }}"

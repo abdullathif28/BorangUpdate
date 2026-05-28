@@ -231,6 +231,7 @@
                                         <td class="text-muted">{{ $indexPeserta + 1 }}</td>
                                         <td class="text-start fw-medium text-dark">{{ $p->nama }}</td>
                                         <td>
+                                            <input type="hidden" name="absensi[{{ $gamesItem->id }}][{{ $p->id }}]" value="0">
                                             <input type="checkbox"
                                                 class="form-check-input custom-cb checkbox-absensi materi-{{ $gamesItem->id }} peserta-{{ $p->id }}"
                                                 name="absensi[{{ $gamesItem->id }}][{{ $p->id }}]"
