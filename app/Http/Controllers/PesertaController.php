@@ -29,7 +29,7 @@ class PesertaController extends Controller
             ]);
         }
 
-        $peserta = Peserta::where('pelatihan_id', $pelatihan->id)->get();
+        $peserta = Peserta::where('pelatihan_id', $pelatihan->id)->orderBy('nama')->get();
 
         return view('peserta.index', compact('peserta', 'pelatihan', 'allPelatihan'));
     }

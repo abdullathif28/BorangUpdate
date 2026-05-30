@@ -31,7 +31,7 @@ class ObservasiImamahKajianController extends Controller
         }
 
         $imamah  = Imamah_kajian::where('pelatihan_id', $pelatihan->id)->get();
-        $peserta = Peserta::where('pelatihan_id', $pelatihan->id)->get();
+        $peserta = Peserta::where('pelatihan_id', $pelatihan->id)->orderBy('nama')->get();
 
         $pesertaIds = $peserta->pluck('id');
         $imamahIds  = $imamah->pluck('id');

@@ -31,7 +31,7 @@ class ObservasigamesController extends Controller
         }
 
         $games   = games::where('pelatihan_id', $pelatihan->id)->get();
-        $peserta = Peserta::where('pelatihan_id', $pelatihan->id)->get();
+        $peserta = Peserta::where('pelatihan_id', $pelatihan->id)->orderBy('nama')->get();
 
         $pesertaIds = $peserta->pluck('id');
         $gamesIds   = $games->pluck('id');

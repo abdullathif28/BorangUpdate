@@ -28,7 +28,7 @@ class HafalanController extends Controller
             ]);
         }
 
-        $peserta = Peserta::where('pelatihan_id', $pelatihan->id)->get();
+        $peserta = Peserta::where('pelatihan_id', $pelatihan->id)->orderBy('nama')->get();
         $ayat    = AyatPelatihan::where('pelatihan_id', $pelatihan->id)->orderBy('urutan')->get();
 
         // Build lookup: [peserta_id][ayat_id] => HafalanNilai

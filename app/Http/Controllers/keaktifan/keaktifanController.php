@@ -31,7 +31,7 @@ class KeaktifanController extends Controller
         }
 
         $materi  = MateriPelatihan::where('pelatihan_id', $pelatihan->id)->get();
-        $peserta = Peserta::where('pelatihan_id', $pelatihan->id)->get();
+        $peserta = Peserta::where('pelatihan_id', $pelatihan->id)->orderBy('nama')->get();
 
         $pesertaIds = $peserta->pluck('id');
         $materiIds  = $materi->pluck('id');

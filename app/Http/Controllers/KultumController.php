@@ -24,7 +24,7 @@ class KultumController extends Controller
             ]);
         }
 
-        $peserta = Peserta::with('kultum')->where('pelatihan_id', $pelatihan->id)->get();
+        $peserta = Peserta::with('kultum')->where('pelatihan_id', $pelatihan->id)->orderBy('nama')->get();
         return view('kultum', compact('peserta', 'pelatihan', 'allPelatihan'));
     }
 
